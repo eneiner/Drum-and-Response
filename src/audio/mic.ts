@@ -15,6 +15,8 @@ class Mic {
   private levelListeners = new Set<LevelListener>();
   private starting: Promise<void> | null = null;
   private sensitivity = 6;
+  /** Mic-to-worklet delay reported by the browser, seconds (0 if unknown). */
+  inputLatency = 0;
 
   get active(): boolean {
     return this.node !== null;
@@ -44,6 +46,8 @@ class Mic {
     this.stream = await navigator.mediaDevices.getUserMedia({
       audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
     });
+    const reported = (this.stream.getAudioTracks()[0]?.getSettings() as { latency?: number } | undefined)?.latency;
+    this.inputLatency = typeof reported === 'number' && reported > 0 ? reported : 0;
     await ctx.audioWorklet.addModule(workletUrl);
     const source = ctx.createMediaStreamSource(this.stream);
     const node = new AudioWorkletNode(ctx, 'onset-processor', {

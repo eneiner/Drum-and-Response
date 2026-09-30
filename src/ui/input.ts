@@ -65,6 +65,22 @@ export async function prepareInput(): Promise<boolean> {
   }
 }
 
+/** Rough mic delay when nothing is reported: capture buffer + resampling. */
+const FALLBACK_INPUT_LATENCY = 0.02;
+
+/**
+ * Seconds to subtract from raw hits. Screen taps are already mapped to what the
+ * player was hearing (eventToAudioTime), so only the tap habit is left.
+ * Mic hits arrive after the full round trip (speaker → air → mic → worklet).
+ */
 export function currentOffset(): number {
-  return settings.inputMode === 'mic' ? settings.micOffset : settings.tapOffset;
+  if (settings.inputMode !== 'mic') return settings.tapOffset;
+  const out = audio.outputLatency;
+  if (!settings.micCalibrated) {
+    // Not calibrated: estimate the round trip instead of assuming zero.
+    return out + (mic.inputLatency || FALLBACK_INPUT_LATENCY);
+  }
+  // Output route changed since calibrating (e.g. headphones plugged in): shift by the difference.
+  const drift = settings.micCalOutputLatency === null ? 0 : out - settings.micCalOutputLatency;
+  return settings.micOffset + drift;
 }
