@@ -108,6 +108,7 @@ export function calibrateScreen(): Screen {
       if (isMic()) {
         settings.micOffset = offset;
         settings.micCalibrated = true;
+        settings.micCalOutputLatency = audio.outputLatency;
       } else {
         settings.tapOffset = offset;
       }

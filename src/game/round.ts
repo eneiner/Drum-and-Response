@@ -107,7 +107,9 @@ export class Round {
       this.resolve = resolve;
       const tick = () => {
         if (this.finished) return;
-        if (audio.now >= tl.respEnd + tl.windows.off + 0.1) this.finish();
+        // Mic onsets arrive one round trip late; wait for the last ones before scoring.
+        const lag = this.opts.inputMode === 'mic' ? Math.max(0, this.opts.offset) : 0;
+        if (audio.now >= tl.respEnd + tl.windows.off + 0.1 + lag) this.finish();
         else this.raf = requestAnimationFrame(tick);
       };
       this.raf = requestAnimationFrame(tick);

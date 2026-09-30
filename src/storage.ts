@@ -12,6 +12,8 @@ export interface Settings {
   /** Seconds to subtract from screen taps. */
   tapOffset: number;
   micCalibrated: boolean;
+  /** Output latency the browser reported when the mic was calibrated (null = unknown). */
+  micCalOutputLatency: number | null;
   /** Metronome volume while it's your turn. */
   responseClick: ClickLevel;
   haptics: boolean;
@@ -41,6 +43,7 @@ export const DEFAULT_SETTINGS: Settings = {
   micOffset: 0,
   tapOffset: 0,
   micCalibrated: false,
+  micCalOutputLatency: null,
   responseClick: 'quiet',
   haptics: true,
   kit: 'rock',
